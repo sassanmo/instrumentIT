@@ -25,6 +25,10 @@ public class Method {
 	
 	@Getter
 	@Setter
+	private String methodType;
+	
+	@Getter
+	@Setter
 	private File file;
 	
 	@Getter

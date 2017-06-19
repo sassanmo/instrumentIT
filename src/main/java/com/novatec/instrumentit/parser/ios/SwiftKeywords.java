@@ -6,6 +6,7 @@ public class SwiftKeywords {
 	
 	public static final String FUNCTION = "func";
 	public static final String CLASS = "class";
+	public static final String STATIC = "static";
 	
 	public static final String SPACE = " ";
 	public static final char SPACE_CHARACTER = ' ';

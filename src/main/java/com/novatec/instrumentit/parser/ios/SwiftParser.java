@@ -46,6 +46,15 @@ public class SwiftParser {
 		for (int i = 0; i < source.length(); i++) {
 			String functionString = SwiftKeywords.FUNCTION + SwiftKeywords.SPACE;
 			if (StringUtil.substringEquals(source, functionString, i)) {
+				String methodType = "";
+				String staticMethod = SwiftKeywords.STATIC + SwiftKeywords.SPACE;
+				if (StringUtil.substringEquals(source, staticMethod, i - staticMethod.length())) {
+					methodType = SwiftKeywords.STATIC;
+				}
+				String classMethod = SwiftKeywords.CLASS + SwiftKeywords.SPACE;
+				if (StringUtil.substringEquals(source, classMethod, i - classMethod.length())) {
+					methodType = SwiftKeywords.CLASS;
+				}
 				i = i + functionString.length();
 				String functionSelector = this.readNextIdentifier(source, i);
 				int functionBeginIndex = i + functionSelector.length();
@@ -53,6 +62,7 @@ public class SwiftParser {
 				String functionBlock = source.substring(functionBeginIndex, functionEndIndex);
 				String functionLanguage = SwiftKeywords.LANGUAGE;
 				Method parsedMethod = new Method(functionSelector, functionBlock, functionBeginIndex, functionEndIndex, this.actualFile, functionLanguage);
+				parsedMethod.setMethodType(methodType);
 				
 				int deltaBegin = Integer.MAX_VALUE;
 				Class holderClass = null;
