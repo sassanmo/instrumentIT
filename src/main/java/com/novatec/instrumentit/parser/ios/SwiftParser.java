@@ -32,13 +32,15 @@ public class SwiftParser {
 		}
 	}
 	
-	public void parse(File file) {
+	public List<Method> parse(File file) {
 		String source = this.loadFile(file);
-		this.parse(source);
+		return this.parse(source);
 	}
 	
-	public void parse(String source) {
-		
+	public List<Method> parse(String source) {
+		source = this.deleteComments(source);
+		List<Class> classes = this.parseClasses(source);
+		return this.parseMethods(source, classes);
 	}
 	
 	public List<Method> parseMethods(String source, List<Class> classes) {
@@ -153,7 +155,7 @@ public class SwiftParser {
 					return identifier;
 				}
 			}
-			identifier = identifier + source.charAt(i);
+			identifier = identifier + source.charAt(i);	
 		}
 		return null;
 	}

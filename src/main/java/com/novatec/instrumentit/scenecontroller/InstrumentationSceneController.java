@@ -1,14 +1,24 @@
 package com.novatec.instrumentit.scenecontroller;
 
 import java.io.File;
+import java.io.IOException;
+import java.util.List;
 
+import com.novatec.instrumentit.application.MainApplication;
+import com.novatec.instrumentit.parser.Method;
+import com.novatec.instrumentit.parser.MethodController;
+import com.novatec.instrumentit.parser.ios.SwiftParser;
 import com.novatec.instrumentit.properties.StringProperties;
 import com.novatec.instrumentit.util.FileUtil;
 
 import javafx.fxml.FXML;
+import javafx.fxml.FXMLLoader;
+import javafx.scene.Parent;
+import javafx.scene.control.ScrollPane;
 import javafx.scene.control.TreeCell;
 import javafx.scene.control.TreeItem;
 import javafx.scene.control.TreeView;
+import javafx.scene.layout.VBox;
 import javafx.util.Callback;
 import lombok.Getter;
 import lombok.Setter;
@@ -25,10 +35,25 @@ public class InstrumentationSceneController {
 
 	@FXML
 	private TreeView<File> sourceTreeView;
+	
+	@Getter
+	@Setter
+	private VBox instrumentatationPane;
+	
+	@Getter
+	@Setter
+	@FXML
+	private ScrollPane scrollPane;
+	
+	@Getter
+	@Setter
+	private MethodController methodController;
 
 	public InstrumentationSceneController() {
+		this.methodController = new MethodController();
+		this.instrumentatationPane = new VBox();
 	}
-
+	
 	public void populateTreeView() {
 		this.performTreeViewSettings();
 		File directory = new File(this.projectDirectory); 
@@ -44,7 +69,8 @@ public class InstrumentationSceneController {
 				root.getChildren().add(getTreeItems(f));
 			} else {
 				if (this.validateSourceFile(f)) {
-					root.getChildren().add(new TreeItem<File>(f));
+					TreeItem<File> treeItem = new TreeItem<File>(f);
+					root.getChildren().add(treeItem);
 				}
 			}
 		}
@@ -52,6 +78,10 @@ public class InstrumentationSceneController {
 	}
 
 	public void performTreeViewSettings() {
+		this.scrollPane.setContent(instrumentatationPane);
+		this.scrollPane.setPannable(true);
+		this.scrollPane.setFitToHeight(true);
+		this.scrollPane.setFitToWidth(true);
 		this.sourceTreeView.setCellFactory(new Callback<TreeView<File>, TreeCell<File>>() {
 			public TreeCell<File> call(TreeView<File> tv) {
 				return new TreeCell<File>() {
@@ -65,6 +95,22 @@ public class InstrumentationSceneController {
 				};
 			}
 		});
+		
+		this.sourceTreeView.getSelectionModel().selectedItemProperty().addListener((observable, oldValue, newValue) -> {
+				// TODO Auto-generated method stub
+				File newFile = newValue.getValue();
+				if (validateSourceFile(newFile)) {
+					this.instrumentatationPane.getChildren().clear();
+					SwiftParser swiftParser = new SwiftParser();
+					List<Method> parsedMethods = swiftParser.parse(newFile);
+					methodController.mapMethods(newFile, parsedMethods);
+					for (Method method : parsedMethods) {
+						this.addMethodElement(method);
+					}
+				} else {
+					this.instrumentatationPane.getChildren().clear();
+				}
+	      });
 		File projectFolder = new File(this.projectDirectory).getParentFile();
 		TreeItem<File> root = new TreeItem<File>(projectFolder);
 		sourceTreeView.setRoot(root);
@@ -81,5 +127,20 @@ public class InstrumentationSceneController {
 		}
 		return false;
 	}
+	
+	public void addMethodElement(Method method) {
+		try {
+			FXMLLoader loader = new FXMLLoader(MainApplication.class.getResource("../scenecontroller/SourceFileElementPane.fxml"));
+			Parent methodView = loader.load();
+			SourceFileElementController controller = loader.<SourceFileElementController>getController();
+			controller.setProperties(method);
+			this.instrumentatationPane.getChildren().add(methodView);
+			
+		} catch (IOException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
+	}
+
 
 }
