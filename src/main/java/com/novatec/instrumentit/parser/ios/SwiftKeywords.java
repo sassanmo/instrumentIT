@@ -12,6 +12,7 @@ public class SwiftKeywords {
 	public static final char SPACE_CHARACTER = ' ';
 	
 	public static final String COLON = ":";
+	public static final String COMMA = ",";
 	
 	public static final String BLOCK_BEGIN = "{";
 	public static final String BLOCK_END = "}";

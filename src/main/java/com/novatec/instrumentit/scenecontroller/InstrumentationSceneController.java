@@ -4,20 +4,30 @@ import java.io.File;
 import java.io.IOException;
 import java.util.List;
 
+import com.google.common.base.Optional;
 import com.novatec.instrumentit.application.MainApplication;
+import com.novatec.instrumentit.codeinjector.ios.MethodSwizzling;
 import com.novatec.instrumentit.parser.Method;
 import com.novatec.instrumentit.parser.MethodController;
+import com.novatec.instrumentit.parser.ios.SwiftKeywords;
 import com.novatec.instrumentit.parser.ios.SwiftParser;
 import com.novatec.instrumentit.properties.StringProperties;
 import com.novatec.instrumentit.util.FileUtil;
 
+import javafx.collections.FXCollections;
+import javafx.collections.ObservableList;
 import javafx.fxml.FXML;
 import javafx.fxml.FXMLLoader;
+import javafx.scene.Node;
 import javafx.scene.Parent;
+import javafx.scene.control.Button;
+import javafx.scene.control.ChoiceBox;
 import javafx.scene.control.ScrollPane;
 import javafx.scene.control.TreeCell;
 import javafx.scene.control.TreeItem;
 import javafx.scene.control.TreeView;
+import javafx.scene.image.Image;
+import javafx.scene.image.ImageView;
 import javafx.scene.layout.VBox;
 import javafx.util.Callback;
 import lombok.Getter;
@@ -48,7 +58,25 @@ public class InstrumentationSceneController {
 	@Getter
 	@Setter
 	private MethodController methodController;
-
+	
+	@Getter
+	@Setter
+	private boolean agentFound;
+	
+	@Getter
+	@Setter
+	@FXML
+	private ChoiceBox<String> instrumentAllChoiceBox;
+	
+	@Getter
+	@Setter
+	private ObservableList<String> strategies;
+	
+	@Getter
+	@Setter
+	@FXML
+	private Button instrumentAllButton;
+	
 	public InstrumentationSceneController() {
 		this.methodController = new MethodController();
 		this.instrumentatationPane = new VBox();
@@ -69,7 +97,14 @@ public class InstrumentationSceneController {
 				root.getChildren().add(getTreeItems(f));
 			} else {
 				if (this.validateSourceFile(f)) {
-					TreeItem<File> treeItem = new TreeItem<File>(f);
+					SwiftParser swiftParser = new SwiftParser();
+					List<Method> parsedMethods = swiftParser.parse(f);
+					methodController.mapMethods(f, parsedMethods);
+					methodController.mapMethodsToClass(parsedMethods);
+					System.out.println( "Path: " + getClass().getResource("/").toExternalForm());
+					System.out.println( "Path: " + getClass().getResource("../res/swiftico2.png").toExternalForm());
+					Image nodeImage = new Image(getClass().getResource("../res/swiftico2.png").toExternalForm());
+					TreeItem<File> treeItem = new TreeItem<File>(f, new ImageView(nodeImage));
 					root.getChildren().add(treeItem);
 				}
 			}
@@ -78,6 +113,14 @@ public class InstrumentationSceneController {
 	}
 
 	public void performTreeViewSettings() {
+		this.strategies = FXCollections.observableArrayList();
+		if (this.selectedSystem.equals(StringProperties.IOS_SYSTEM)) {
+			for (String strategy : StringProperties.IOS_COLLECTION_STRATEGIES) {
+				this.strategies.add(strategy);
+			}
+		}
+		this.instrumentAllChoiceBox.setItems(this.strategies);
+		this.instrumentAllChoiceBox.getSelectionModel().selectFirst();
 		this.scrollPane.setContent(instrumentatationPane);
 		this.scrollPane.setPannable(true);
 		this.scrollPane.setFitToHeight(true);
@@ -103,7 +146,7 @@ public class InstrumentationSceneController {
 					this.instrumentatationPane.getChildren().clear();
 					SwiftParser swiftParser = new SwiftParser();
 					List<Method> parsedMethods = swiftParser.parse(newFile);
-					methodController.mapMethods(newFile, parsedMethods);
+					//methodController.mapMethods(newFile, parsedMethods);
 					for (Method method : parsedMethods) {
 						this.addMethodElement(method);
 					}
@@ -139,6 +182,22 @@ public class InstrumentationSceneController {
 		} catch (IOException e) {
 			// TODO Auto-generated catch block
 			e.printStackTrace();
+		}
+	}
+	
+	@FXML
+	public void instrumentAllButtonClicked() {
+		System.out.println("instrumentAllButtonClicked");
+		if (this.selectedSystem.equals(StringProperties.IOS_SYSTEM)) {
+			if (this.instrumentAllChoiceBox.getSelectionModel().getSelectedItem().equals(StringProperties.IOS_METHOD_SWIZZLING)) {
+				MethodSwizzling methodSwizzling = new MethodSwizzling(this.methodController);
+				try {
+					methodSwizzling.performSwizzling();
+				} catch (IOException e) {
+					// TODO Auto-generated catch block
+					e.printStackTrace();
+				}
+			}
 		}
 	}
 

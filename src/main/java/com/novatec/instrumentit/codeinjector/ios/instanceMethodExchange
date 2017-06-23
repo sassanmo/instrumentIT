@@ -1,0 +1,2 @@
+	let originalMethod = class_getInstanceMethod(instance, originalSelector)
+	let swizzledMethod = class_getInstanceMethod(instance, swizzledSelector)

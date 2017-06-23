@@ -1,0 +1,14 @@
+//
+// swizzling computed attribute for selector:
+// IITM_METHOD_SELECTOR
+//
+private let IITM_SWIZZLING_ATTRIBUTE: (IITM_CLASS_NAME.Type) -> () = { instance in
+    
+    let originalSelector = #selector(instance.IITM_METHOD_SELECTOR)
+    let swizzledSelector = #selector(instance.IITM_INJECTED_METHOD_SELECTOR)
+    
+    IITM_GET_METHODS
+    
+    method_exchangeImplementations(originalMethod, swizzledMethod);
+    
+}

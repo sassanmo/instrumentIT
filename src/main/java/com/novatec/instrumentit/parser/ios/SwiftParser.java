@@ -63,7 +63,7 @@ public class SwiftParser {
 				int functionEndIndex = this.countBlockSize(source, functionBeginIndex);
 				String functionBlock = source.substring(functionBeginIndex, functionEndIndex);
 				String functionLanguage = SwiftKeywords.LANGUAGE;
-				Method parsedMethod = new Method(functionSelector, functionBlock, functionBeginIndex, functionEndIndex, this.actualFile, functionLanguage);
+				Method parsedMethod = new IosMethod(functionSelector, functionBlock, functionBeginIndex, functionEndIndex, this.actualFile, functionLanguage);
 				parsedMethod.setMethodType(methodType);
 				
 				int deltaBegin = Integer.MAX_VALUE;

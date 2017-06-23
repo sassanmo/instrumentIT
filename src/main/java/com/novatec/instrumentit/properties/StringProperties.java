@@ -13,6 +13,8 @@ public class StringProperties {
 	public static final String ANDROID_SYSTEM = "Android";
 	public static final List<String> ANDROID_SOURCEFILES = new LinkedList<>(Arrays.asList(".java", ".noidea"));
 	
+	public static final List<String> IOS_COLLECTION_STRATEGIES = new LinkedList<>(Arrays.asList("Tracing", "Method Swizzling"));
+	public static final String IOS_METHOD_SWIZZLING = "Method Swizzling";
 	
 	public static final String FOLDER_EXTENSION = "";
 }

@@ -43,6 +43,10 @@ public class Method {
 	@Setter
 	private String language;
 	
+	@Getter
+	@Setter
+	private boolean hasReturnType;
+	
 	public Method(String signature, String implementation, int beginIndex, int endIndex, File file, String language) {
 		this.signature = signature;
 		this.implementationBlock = implementation;

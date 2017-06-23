@@ -1,0 +1,10 @@
+extension IITM_CLASS_NAME {
+    
+    open override class func initialize() {
+        // make sure this isn't a subclass
+        guard self === IITM_CLASS_NAME.self else { return }
+        IITM_SWIZZLING_ATTRIBUTE_CALLS
+    }
+    
+    IITM_INJECTED_FUNCTIONS
+}
