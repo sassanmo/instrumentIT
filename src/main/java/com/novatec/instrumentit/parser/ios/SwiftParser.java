@@ -59,12 +59,16 @@ public class SwiftParser {
 				}
 				i = i + functionString.length();
 				String functionSelector = this.readNextIdentifier(source, i);
+				String returnType = this.parseReturnType(source, i + functionSelector.length() - 1);
+				
 				int functionBeginIndex = i + functionSelector.length();
 				int functionEndIndex = this.countBlockSize(source, functionBeginIndex);
 				String functionBlock = source.substring(functionBeginIndex, functionEndIndex);
 				String functionLanguage = SwiftKeywords.LANGUAGE;
 				Method parsedMethod = new IosMethod(functionSelector, functionBlock, functionBeginIndex, functionEndIndex, this.actualFile, functionLanguage);
 				parsedMethod.setMethodType(methodType);
+				parsedMethod.setReturnType(returnType);
+				parsedMethod.setHasReturnType(returnType != null);
 				
 				int deltaBegin = Integer.MAX_VALUE;
 				Class holderClass = null;
@@ -156,6 +160,29 @@ public class SwiftParser {
 				}
 			}
 			identifier = identifier + source.charAt(i);	
+		}
+		return null;
+	}
+	
+	public String parseReturnType(String source, int index) {
+		String returnType = "";
+		boolean hasReturnType = false;
+		for (int i = index; i > 0; i--) {
+			if (!hasReturnType) {
+				if (source.charAt(i) == '>') {
+					hasReturnType = true;
+					return returnType;
+				} else if (StringUtil.substringEquals(source, SwiftKeywords.ROUND_BRACE_CLOSE, i)) {
+					hasReturnType = false;
+					return null;
+				}
+			} else {
+				if (StringUtil.substringEquals(source, SwiftKeywords.ROUND_BRACE_CLOSE, i)) {
+					returnType = returnType.trim();
+					return returnType;
+				}
+			}
+			returnType = source.charAt(i) + returnType;
 		}
 		return null;
 	}

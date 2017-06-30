@@ -89,22 +89,26 @@ public class MethodSwizzling {
 	private String getSwizzledMethod(IosMethod iosMethod) throws IOException {
 		String method = iosMethod.getSignature();
 		method = "func iitm_" + method;
-		method = method + " {";
+		method = method + "{";
 		method = method + "\n\t";
 		String pathStartInvocation = MethodSwizzling.class.getResource("startInvocation").getPath();
 		String startInvocationString = this.readFile(pathStartInvocation, Charset.defaultCharset());
 		method = method + startInvocationString;
 		method = method + "\n\t";
-		method = method + this.getMethodCall(iosMethod.getSignature());
+		method = method + this.getMethodCall(iosMethod.getSignature(), iosMethod);
 		method = method + "\n\t";
 		String pathCloseInvocation = MethodSwizzling.class.getResource("closeInvocation").getPath();
 		String closeInvocationString = this.readFile(pathCloseInvocation, Charset.defaultCharset());
 		method = method + closeInvocationString;
+		if (iosMethod.getReturnType() != null) {
+			method = method + "\n";
+			method = method + "return result";
+		}
 		method = method + "\n\t}\n";
 		return method;
 	}
 
-	private String getMethodCall(String signature) {
+	private String getMethodCall(String signature, IosMethod iosMethod) {
 		String actualArgument = "";
 		String argumentBlock = "(";
 		String methodCall = "iitm_";
@@ -122,7 +126,7 @@ public class MethodSwizzling {
 						if (signature.charAt(i) == '_') {
 							single = true;
 						}
-						if (signature.charAt(i) != ' ' || signature.charAt(i) != '_') {
+						if (signature.charAt(i) != ' ' && signature.charAt(i) != '_') {
 							actualArgument = actualArgument + signature.charAt(i);
 						}
 					}
@@ -135,9 +139,10 @@ public class MethodSwizzling {
 				}
 				if (signature.charAt(i) == SwiftKeywords.COLON.charAt(0)) {
 					if (single) {
+						actualArgument = actualArgument.replace(":", "");
 						argumentBlock = argumentBlock + actualArgument;
 					} else {
-						argumentBlock = argumentBlock + actualArgument + ": " + actualArgument;
+						argumentBlock = argumentBlock + actualArgument + " " + actualArgument.replace(":", "");
 					}
 					actualArgument = "";
 					argumentFound = false;
@@ -152,6 +157,9 @@ public class MethodSwizzling {
 			}
 		}
 		methodCall = methodCall + argumentBlock;
+		if (iosMethod.getReturnType() != null) {
+			methodCall = "let result = " + methodCall;
+		}
 		return methodCall;
 	}
 

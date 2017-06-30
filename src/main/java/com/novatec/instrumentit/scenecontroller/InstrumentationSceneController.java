@@ -45,46 +45,46 @@ public class InstrumentationSceneController {
 
 	@FXML
 	private TreeView<File> sourceTreeView;
-	
+
 	@Getter
 	@Setter
 	private VBox instrumentatationPane;
-	
+
 	@Getter
 	@Setter
 	@FXML
 	private ScrollPane scrollPane;
-	
+
 	@Getter
 	@Setter
 	private MethodController methodController;
-	
+
 	@Getter
 	@Setter
 	private boolean agentFound;
-	
+
 	@Getter
 	@Setter
 	@FXML
 	private ChoiceBox<String> instrumentAllChoiceBox;
-	
+
 	@Getter
 	@Setter
 	private ObservableList<String> strategies;
-	
+
 	@Getter
 	@Setter
 	@FXML
 	private Button instrumentAllButton;
-	
+
 	public InstrumentationSceneController() {
 		this.methodController = new MethodController();
 		this.instrumentatationPane = new VBox();
 	}
-	
+
 	public void populateTreeView() {
 		this.performTreeViewSettings();
-		File directory = new File(this.projectDirectory); 
+		File directory = new File(this.projectDirectory);
 		sourceTreeView.getRoot().getChildren().add(this.getTreeItems(directory));
 	}
 
@@ -97,15 +97,17 @@ public class InstrumentationSceneController {
 				root.getChildren().add(getTreeItems(f));
 			} else {
 				if (this.validateSourceFile(f)) {
-					SwiftParser swiftParser = new SwiftParser();
-					List<Method> parsedMethods = swiftParser.parse(f);
-					methodController.mapMethods(f, parsedMethods);
-					methodController.mapMethodsToClass(parsedMethods);
-					System.out.println( "Path: " + getClass().getResource("/").toExternalForm());
-					System.out.println( "Path: " + getClass().getResource("../res/swiftico2.png").toExternalForm());
-					Image nodeImage = new Image(getClass().getResource("../res/swiftico2.png").toExternalForm());
-					TreeItem<File> treeItem = new TreeItem<File>(f, new ImageView(nodeImage));
-					root.getChildren().add(treeItem);
+					if (!f.getName().contains("IITM")) {
+						SwiftParser swiftParser = new SwiftParser();
+						List<Method> parsedMethods = swiftParser.parse(f);
+						methodController.mapMethods(f, parsedMethods);
+						methodController.mapMethodsToClass(parsedMethods);
+						System.out.println("Path: " + getClass().getResource("/").toExternalForm());
+						System.out.println("Path: " + getClass().getResource("../res/swiftico2.png").toExternalForm());
+						Image nodeImage = new Image(getClass().getResource("../res/swiftico2.png").toExternalForm());
+						TreeItem<File> treeItem = new TreeItem<File>(f, new ImageView(nodeImage));
+						root.getChildren().add(treeItem);
+					}
 				}
 			}
 		}
@@ -138,22 +140,22 @@ public class InstrumentationSceneController {
 				};
 			}
 		});
-		
+
 		this.sourceTreeView.getSelectionModel().selectedItemProperty().addListener((observable, oldValue, newValue) -> {
-				// TODO Auto-generated method stub
-				File newFile = newValue.getValue();
-				if (validateSourceFile(newFile)) {
-					this.instrumentatationPane.getChildren().clear();
-					SwiftParser swiftParser = new SwiftParser();
-					List<Method> parsedMethods = swiftParser.parse(newFile);
-					//methodController.mapMethods(newFile, parsedMethods);
-					for (Method method : parsedMethods) {
-						this.addMethodElement(method);
-					}
-				} else {
-					this.instrumentatationPane.getChildren().clear();
+			// TODO Auto-generated method stub
+			File newFile = newValue.getValue();
+			if (validateSourceFile(newFile)) {
+				this.instrumentatationPane.getChildren().clear();
+				SwiftParser swiftParser = new SwiftParser();
+				List<Method> parsedMethods = swiftParser.parse(newFile);
+				// methodController.mapMethods(newFile, parsedMethods);
+				for (Method method : parsedMethods) {
+					this.addMethodElement(method);
 				}
-	      });
+			} else {
+				this.instrumentatationPane.getChildren().clear();
+			}
+		});
 		File projectFolder = new File(this.projectDirectory).getParentFile();
 		TreeItem<File> root = new TreeItem<File>(projectFolder);
 		sourceTreeView.setRoot(root);
@@ -170,26 +172,28 @@ public class InstrumentationSceneController {
 		}
 		return false;
 	}
-	
+
 	public void addMethodElement(Method method) {
 		try {
-			FXMLLoader loader = new FXMLLoader(MainApplication.class.getResource("../scenecontroller/SourceFileElementPane.fxml"));
+			FXMLLoader loader = new FXMLLoader(
+					MainApplication.class.getResource("../scenecontroller/SourceFileElementPane.fxml"));
 			Parent methodView = loader.load();
 			SourceFileElementController controller = loader.<SourceFileElementController>getController();
 			controller.setProperties(method);
 			this.instrumentatationPane.getChildren().add(methodView);
-			
+
 		} catch (IOException e) {
 			// TODO Auto-generated catch block
 			e.printStackTrace();
 		}
 	}
-	
+
 	@FXML
 	public void instrumentAllButtonClicked() {
 		System.out.println("instrumentAllButtonClicked");
 		if (this.selectedSystem.equals(StringProperties.IOS_SYSTEM)) {
-			if (this.instrumentAllChoiceBox.getSelectionModel().getSelectedItem().equals(StringProperties.IOS_METHOD_SWIZZLING)) {
+			if (this.instrumentAllChoiceBox.getSelectionModel().getSelectedItem()
+					.equals(StringProperties.IOS_METHOD_SWIZZLING)) {
 				MethodSwizzling methodSwizzling = new MethodSwizzling(this.methodController);
 				try {
 					methodSwizzling.performSwizzling();
@@ -200,6 +204,5 @@ public class InstrumentationSceneController {
 			}
 		}
 	}
-
 
 }

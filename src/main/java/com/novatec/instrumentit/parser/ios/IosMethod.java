@@ -30,6 +30,7 @@ public class IosMethod extends Method {
 		boolean argrumentsBlockFound = false;
 		boolean argrumentsBlockEnded = false;
 		boolean argumentFound = false;
+		boolean single = false;
 		List<String> arguments = new LinkedList<String>();
 		String argument = "";
 		String name = "";
@@ -39,7 +40,13 @@ public class IosMethod extends Method {
 					i = selector.length();
 				} else {
 					if (argumentFound) {
-						argument = argument + selector.charAt(i);
+						if (selector.charAt(i) == '_') {
+							single = true;
+							argument = argument + "_:";
+						}
+						if (!single && selector.charAt(i) != ' ' && selector.charAt(i) != '_') {
+							argument = argument + selector.charAt(i);
+						}
 					}
 				}
 			}
