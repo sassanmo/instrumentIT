@@ -44,5 +44,13 @@ public class StringUtil {
 		}
 		return false;
 	}
+	
+	public static String addString(String string, String stringToAdd, int position) {
+		if (position < string.length()) {
+			return string.substring(0, position) + stringToAdd + string.substring(position, string.length());
+		} else {
+			return string;
+		}
+	}
 
 }

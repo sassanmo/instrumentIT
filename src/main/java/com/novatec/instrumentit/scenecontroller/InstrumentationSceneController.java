@@ -7,6 +7,7 @@ import java.util.List;
 import com.google.common.base.Optional;
 import com.novatec.instrumentit.application.MainApplication;
 import com.novatec.instrumentit.codeinjector.ios.MethodSwizzling;
+import com.novatec.instrumentit.codeinjector.ios.Tracing;
 import com.novatec.instrumentit.parser.Method;
 import com.novatec.instrumentit.parser.MethodController;
 import com.novatec.instrumentit.parser.ios.SwiftKeywords;
@@ -202,6 +203,18 @@ public class InstrumentationSceneController {
 					e.printStackTrace();
 				}
 			}
+			
+			if (this.instrumentAllChoiceBox.getSelectionModel().getSelectedItem()
+					.equals(StringProperties.IOS_TRACING)) {
+				Tracing tracing = new Tracing(this.methodController);
+				try {
+					tracing.performTracing();
+				} catch (IOException e) {
+					// TODO Auto-generated catch block
+					e.printStackTrace();
+				}
+			}
+			
 		}
 	}
 

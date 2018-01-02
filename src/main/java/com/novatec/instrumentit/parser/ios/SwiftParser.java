@@ -1,7 +1,10 @@
 package com.novatec.instrumentit.parser.ios;
 
 import java.io.File;
+import java.io.FileNotFoundException;
+import java.io.FileOutputStream;
 import java.io.IOException;
+import java.nio.charset.Charset;
 import java.util.LinkedList;
 import java.util.List;
 
@@ -39,6 +42,7 @@ public class SwiftParser {
 	
 	public List<Method> parse(String source) {
 		source = this.deleteComments(source);
+		this.writeFile(actualFile, source);
 		List<Class> classes = this.parseClasses(source);
 		return this.parseMethods(source, classes);
 	}
@@ -46,6 +50,22 @@ public class SwiftParser {
 	public List<Method> parseMethods(String source, List<Class> classes) {
 		LinkedList<Method> methods = new LinkedList<Method>();
 		for (int i = 0; i < source.length(); i++) {
+			String protocolString = SwiftKeywords.PROTOCOL + SwiftKeywords.SPACE;
+			if (StringUtil.substringEquals(source, protocolString, i)) {
+				int blocksize = countBlockSize(source, i);
+				i = blocksize;
+			}
+			String enumString = SwiftKeywords.ENUM + SwiftKeywords.SPACE;
+			if (StringUtil.substringEquals(source, enumString, i)) {
+				int blocksize = countBlockSize(source, i);
+				i = blocksize;
+			}
+			String structString = SwiftKeywords.STRUCT + SwiftKeywords.SPACE;
+			if (StringUtil.substringEquals(source, structString, i)) {
+				int blocksize = countBlockSize(source, i);
+				i = blocksize;
+			}
+			
 			String functionString = SwiftKeywords.FUNCTION + SwiftKeywords.SPACE;
 			if (StringUtil.substringEquals(source, functionString, i)) {
 				String methodType = "";
@@ -190,7 +210,7 @@ public class SwiftParser {
 	public int countBlockSize(String source, int index) {
 		int openedBraces = 0;
 		int closedBraces = 0;
-		for (int i = 0; i < source.length(); i++) {
+		for (int i = index; i < source.length(); i++) {
 			if (StringUtil.substringEquals(source, SwiftKeywords.BLOCK_BEGIN, i)) {
 				openedBraces = openedBraces + 1;
 			} else if (StringUtil.substringEquals(source, SwiftKeywords.BLOCK_END, i)) {
@@ -201,6 +221,22 @@ public class SwiftParser {
 			} 
 		}
 		return -1;
+	}
+	
+	public void writeFile(File file, String string) {
+		FileOutputStream stream;
+		try {
+			stream = new FileOutputStream(file, false);
+			byte[] b = string.getBytes(Charset.forName("UTF-8"));
+			stream.write(b);
+		} catch (FileNotFoundException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		} catch (IOException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
+		
 	}
 	
 }

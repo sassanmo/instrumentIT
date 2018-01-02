@@ -5,6 +5,9 @@ public class SwiftKeywords {
 	public static final String LANGUAGE = "Swift";
 	
 	public static final String FUNCTION = "func";
+	public static final String PROTOCOL = "protocol";
+	public static final String ENUM = "enum";
+	public static final String STRUCT = "struct";
 	public static final String CLASS = "class";
 	public static final String STATIC = "static";
 	

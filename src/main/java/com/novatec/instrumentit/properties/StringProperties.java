@@ -15,6 +15,7 @@ public class StringProperties {
 	
 	public static final List<String> IOS_COLLECTION_STRATEGIES = new LinkedList<>(Arrays.asList("Tracing", "Method Swizzling"));
 	public static final String IOS_METHOD_SWIZZLING = "Method Swizzling";
+	public static final String IOS_TRACING = "Tracing";
 	
 	public static final String FOLDER_EXTENSION = "";
 }
